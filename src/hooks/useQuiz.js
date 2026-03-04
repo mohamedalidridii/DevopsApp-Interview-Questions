@@ -3,22 +3,48 @@ import db from '../data/db.json'
 
 const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5)
 
-export function useQuiz() {
-  const [screen, setScreen]   = useState('home')   // 'home' | 'quiz' | 'result'
-  const [questions, setQuestions] = useState([])
-  const [idx, setIdx]         = useState(0)
-  const [revealed, setRevealed] = useState(false)
-  const [chosen, setChosen]   = useState(null)
-  const [score, setScore]     = useState(0)
-  const [wrong, setWrong]     = useState(0)
-  const [skipped, setSkipped] = useState(0)
+// Derive all categories + per-category metadata from db
+export const ALL_CATEGORIES = (() => {
+  const map = {}
+  db.questions.forEach((q) => {
+    if (!map[q.category]) {
+      map[q.category] = { name: q.category, count: 0, hard: 0 }
+    }
+    map[q.category].count++
+    if (q.difficulty === 'hard') map[q.category].hard++
+  })
+  return Object.values(map)
+})()
 
-  const currentQ = questions[idx] ?? null
-  const isLast   = idx + 1 >= questions.length
+export function useQuiz() {
+  // screens: 'home' | 'categories' | 'quiz' | 'result'
+  const [screen, setScreen]         = useState('home')
+  const [activeCategory, setActiveCategory] = useState(null) // null = All
+  const [questions, setQuestions]   = useState([])
+  const [idx, setIdx]               = useState(0)
+  const [revealed, setRevealed]     = useState(false)
+  const [chosen, setChosen]         = useState(null)
+  const [score, setScore]           = useState(0)
+  const [wrong, setWrong]           = useState(0)
+  const [skipped, setSkipped]       = useState(0)
+
+  const currentQ  = questions[idx] ?? null
+  const isLast    = idx + 1 >= questions.length
   const isCorrect = revealed && chosen === currentQ?.answer
 
-  const start = useCallback(() => {
-    setQuestions(shuffle(db.questions))
+  // Go to category picker
+  const goToCategories = useCallback(() => setScreen('categories'), [])
+
+  // Go back to home
+  const goToHome = useCallback(() => setScreen('home'), [])
+
+  // Start quiz — category=null means "All"
+  const start = useCallback((category = null) => {
+    const pool = category
+      ? db.questions.filter((q) => q.category === category)
+      : db.questions
+    setActiveCategory(category)
+    setQuestions(shuffle(pool))
     setIdx(0)
     setScore(0)
     setWrong(0)
@@ -37,10 +63,7 @@ export function useQuiz() {
   }, [revealed, currentQ])
 
   const advance = useCallback(() => {
-    if (isLast) {
-      setScreen('result')
-      return
-    }
+    if (isLast) { setScreen('result'); return }
     setIdx((i) => i + 1)
     setRevealed(false)
     setChosen(null)
@@ -51,12 +74,12 @@ export function useQuiz() {
     advance()
   }, [advance])
 
-  const progress = questions.length
-    ? Math.round(((idx + 1) / questions.length) * 100)
-    : 0
+  // From result: go back to category picker (not home)
+  const backToCategories = useCallback(() => setScreen('categories'), [])
 
   return {
     screen,
+    activeCategory,
     currentQ,
     idx,
     total: questions.length,
@@ -67,11 +90,13 @@ export function useQuiz() {
     score,
     wrong,
     skipped,
-    progress,
     allQuestions: db.questions,
+    goToCategories,
+    goToHome,
     start,
     pick,
     advance,
     skip,
+    backToCategories,
   }
 }

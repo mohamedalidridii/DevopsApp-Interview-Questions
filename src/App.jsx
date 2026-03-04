@@ -1,8 +1,9 @@
 import { useQuiz } from './hooks/useQuiz'
-import HomeScreen   from './components/HomeScreen'
-import QuestionCard from './components/QuestionCard'
-import ResultScreen from './components/ResultScreen'
-import ProgressBar  from './components/ProgressBar'
+import HomeScreen     from './components/HomeScreen'
+import CategoryScreen from './components/CategoryScreen'
+import QuestionCard   from './components/QuestionCard'
+import ResultScreen   from './components/ResultScreen'
+import ProgressBar    from './components/ProgressBar'
 import styles from './App.module.css'
 
 export default function App() {
@@ -15,12 +16,18 @@ export default function App() {
 
       {/* ── Topbar ── */}
       <header className={styles.topbar}>
-        <div className={styles.logo}>
+        <button
+          className={styles.logo}
+          onClick={() => quiz.screen !== 'home' && quiz.goToHome()}
+          style={{ cursor: quiz.screen !== 'home' ? 'pointer' : 'default', background: 'none', border: 'none' }}
+        >
           Dev<em>Ops</em>.Quiz
-        </div>
+        </button>
+
         {quiz.screen === 'quiz' && (
           <div className={styles.liveScore}>
-            <strong>LIVE</strong> · {quiz.total} questions
+            <strong>{quiz.activeCategory ?? 'ALL'}</strong>
+            &nbsp;·&nbsp;{quiz.idx + 1}/{quiz.total}
           </div>
         )}
       </header>
@@ -34,7 +41,15 @@ export default function App() {
       {quiz.screen === 'home' && (
         <HomeScreen
           questions={quiz.allQuestions}
+          onEnter={quiz.goToCategories}
+        />
+      )}
+
+      {quiz.screen === 'categories' && (
+        <CategoryScreen
+          allQuestions={quiz.allQuestions}
           onStart={quiz.start}
+              onBack={quiz.goToHome}
         />
       )}
 
@@ -63,7 +78,9 @@ export default function App() {
           wrong={quiz.wrong}
           skipped={quiz.skipped}
           total={quiz.total}
-          onRestart={quiz.start}
+          category={quiz.activeCategory}
+          onRestart={() => quiz.start(quiz.activeCategory)}
+          onChangeCategory={quiz.backToCategories}
         />
       )}
     </div>

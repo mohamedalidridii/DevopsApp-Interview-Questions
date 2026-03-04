@@ -1,8 +1,7 @@
-import Badge from './Badge'
 import { CAT_COLORS, DEFAULT_CAT } from '../data/constants'
 import styles from './HomeScreen.module.css'
 
-export default function HomeScreen({ questions, onStart }) {
+export default function HomeScreen({ questions, onEnter }) {
   const categories = [...new Set(questions.map((q) => q.category))]
   const hardCount  = questions.filter((q) => q.difficulty === 'hard').length
 
@@ -38,23 +37,24 @@ export default function HomeScreen({ questions, onStart }) {
 
         <div className={styles.divider} />
 
-        <div className={styles.catGrid}>
+        {/* Category dots preview */}
+        <div className={styles.catDots}>
           {categories.map((cat) => {
             const col = CAT_COLORS[cat] ?? DEFAULT_CAT
             return (
-              <Badge
+              <span
                 key={cat}
-                label={cat}
-                color={col.c}
-                bg={col.bg}
-                borderColor={col.bd}
+                className={styles.dot}
+                title={cat}
+                style={{ background: col.c }}
               />
             )
           })}
         </div>
+        <p className={styles.catHint}>{categories.length} topics available — pick one or play all</p>
 
-        <button className={styles.startBtn} onClick={onStart}>
-          BEGIN QUIZ
+        <button className={styles.startBtn} onClick={onEnter}>
+          CHOOSE CATEGORY
           <span className={styles.arrow}>→</span>
         </button>
       </div>

@@ -78,11 +78,26 @@
   margin: 28px 0;
 }
 
-.catGrid {
+.catDots {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 36px;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.catHint {
+  font-size: 11px;
+  color: var(--mu);
+  letter-spacing: 0.06em;
+  margin-bottom: 32px;
 }
 
 .startBtn {
