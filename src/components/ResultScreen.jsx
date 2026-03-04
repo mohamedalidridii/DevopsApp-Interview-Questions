@@ -2,18 +2,30 @@ import RingChart from './RingChart'
 import styles from './ResultScreen.module.css'
 
 function getGrade(pct) {
-  if (pct >= 90) return { title: 'ELITE',         sub: 'Top-tier senior engineering judgement.' }
-  if (pct >= 75) return { title: 'SENIOR',         sub: 'Solid depth. Ready for senior-level interviews.' }
-  if (pct >= 55) return { title: 'MID-LEVEL',      sub: 'Good foundations — sharpen the hard topics.' }
-  return              { title: 'KEEP GRINDING',   sub: 'Study the explanations and retry.' }
+  if (pct >= 90) return { title: 'ELITE',       sub: 'Top-tier senior engineering judgement.' }
+  if (pct >= 75) return { title: 'SENIOR',       sub: 'Solid depth. Ready for senior-level interviews.' }
+  if (pct >= 55) return { title: 'MID-LEVEL',    sub: 'Good foundations — sharpen the hard topics.' }
+  return              { title: 'KEEP\nGRINDING', sub: 'Study the explanations and retry.' }
 }
 
-export default function ResultScreen({ score, wrong, skipped, total, onRestart }) {
+export default function ResultScreen({
+  score, wrong, skipped, total,
+  category,   // null = "All"
+  onRestart,  // retry same category
+  onChangeCategory,
+}) {
   const pct   = Math.round((score / total) * 100)
   const grade = getGrade(pct)
 
   return (
     <div className={styles.result}>
+
+      <div className={styles.topRow}>
+        <div className={styles.catPill}>
+          {category ? `// ${category}` : '// All Categories'}
+        </div>
+      </div>
+
       <div className={styles.grade}>{grade.title}</div>
       <div className={styles.sub}>{grade.sub}</div>
       <p className={styles.label}>QUIZ COMPLETE · {total} QUESTIONS</p>
@@ -33,10 +45,14 @@ export default function ResultScreen({ score, wrong, skipped, total, onRestart }
         ))}
       </div>
 
-      <button className={styles.restartBtn} onClick={onRestart}>
-        ↺ RETRY QUIZ
-        <span className={styles.arrow}>→</span>
-      </button>
+      <div className={styles.actions}>
+        <button className={styles.retryBtn} onClick={onRestart}>
+          ↺ RETRY {category ? category.toUpperCase() : 'ALL'}
+        </button>
+        <button className={styles.changeBtn} onClick={onChangeCategory}>
+          CHANGE TOPIC →
+        </button>
+      </div>
     </div>
   )
 }

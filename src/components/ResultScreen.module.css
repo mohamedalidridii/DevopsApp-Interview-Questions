@@ -4,17 +4,35 @@
   background: var(--s1);
   border: 1px solid var(--bd);
   border-radius: 14px;
-  padding: clamp(32px, 5vw, 56px) clamp(20px, 5vw, 48px);
+  padding: clamp(32px, 5vw, 52px) clamp(20px, 5vw, 48px);
   text-align: center;
   animation: slideUp 0.4s ease both;
 }
 
+.topRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.catPill {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ac);
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
 .grade {
   font-family: var(--disp);
-  font-size: clamp(44px, 10vw, 82px);
+  font-size: clamp(44px, 10vw, 80px);
   letter-spacing: 0.04em;
   line-height: 1;
   margin-bottom: 8px;
+  white-space: pre-line;
   background: linear-gradient(135deg, var(--bright) 30%, var(--ac));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -38,7 +56,7 @@
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
   flex-wrap: wrap;
 }
 
@@ -63,31 +81,54 @@
   margin-top: 3px;
 }
 
-.restartBtn {
+/* ── Action buttons ── */
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.retryBtn {
   font-family: var(--mono);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.12em;
-  padding: 14px 40px;
+  padding: 12px 28px;
   border-radius: 8px;
   border: 1px solid rgba(56, 189, 248, 0.4);
   background: rgba(56, 189, 248, 0.08);
   color: var(--ac);
   cursor: pointer;
   transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
 }
-.restartBtn:hover {
+.retryBtn:hover {
   background: rgba(56, 189, 248, 0.15);
-  box-shadow: 0 0 32px rgba(56, 189, 248, 0.18);
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.15);
   transform: translateY(-2px);
 }
 
-.arrow { transition: transform 0.2s; }
-.restartBtn:hover .arrow { transform: translateX(4px); }
+.changeBtn {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: 1px solid var(--bd2);
+  background: transparent;
+  color: var(--mu);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.changeBtn:hover {
+  color: var(--tx);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
 
 @media (max-width: 560px) {
   .result { padding: 28px 16px; }
+  .actions { flex-direction: column; align-items: stretch; }
+  .retryBtn, .changeBtn { text-align: center; }
 }
