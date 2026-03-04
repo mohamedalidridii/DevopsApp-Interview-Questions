@@ -1,0 +1,214 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "question": "A pod is stuck in 'CrashLoopBackOff'. Walk through your exact debugging steps.",
+      "options": [
+        "Delete and recreate the pod immediately to reset state",
+        "kubectl describe pod → check Events, kubectl logs --previous → check exit code, validate liveness probes, inspect resource limits",
+        "Drain the node and reschedule the pod elsewhere",
+        "Increase memory limits and redeploy"
+      ],
+      "answer": 1,
+      "explanation": "Systematic: (1) kubectl describe pod for Events & probe failures, (2) kubectl logs --previous for last crash output, (3) decode exit code — OOMKilled=memory, 137=SIGKILL, 1=app error, (4) check liveness/readiness probe thresholds, (5) inspect resource requests vs limits."
+    },
+    {
+      "id": 2,
+      "category": "CI/CD",
+      "difficulty": "hard",
+      "question": "Your monorepo test suite takes 50 minutes. How do you cut it to under 10 without dropping coverage?",
+      "options": [
+        "Remove slow integration tests and only run unit tests",
+        "Parallelize across agents, use test impact analysis to run only affected tests, cache dependencies and build artifacts aggressively",
+        "Run tests asynchronously after deployment and rollback on failure",
+        "Split the monorepo into microrepos so tests are smaller"
+      ],
+      "answer": 1,
+      "explanation": "Test Impact Analysis (TIA) maps test-to-code dependencies — only changed paths trigger related tests. Combine with: parallel agents (pytest-split, jest --shard), layer caching (BuildKit, Nx cache, Bazel remote cache), and artifact reuse across pipeline stages."
+    },
+    {
+      "id": 3,
+      "category": "IaC",
+      "difficulty": "hard",
+      "question": "With 200+ Terraform resources, state drift is increasing. What architectural changes do you make?",
+      "options": [
+        "Run terraform apply -auto-approve on a schedule to correct drift",
+        "Split state by domain/environment, use remote backends with locking (S3+DynamoDB), enforce drift detection in CI with terraform plan, adopt Atlantis for PR-driven workflows",
+        "Keep one state file but add more detailed resource tags",
+        "Migrate everything to CloudFormation for native drift detection"
+      ],
+      "answer": 1,
+      "explanation": "State decomposition: network/compute/data as separate root modules limits blast radius. Remote state + DynamoDB locking stops concurrent apply corruption. Running terraform plan in CI surfaces drift before incidents. Atlantis enforces plan→apply workflow with audit trail in PRs."
+    },
+    {
+      "id": 4,
+      "category": "Observability",
+      "difficulty": "hard",
+      "question": "Production p99 latency spikes intermittently, affecting ~2% of requests. How do you find root cause?",
+      "options": [
+        "Add more replicas to absorb the load and monitor if spikes decrease",
+        "Implement distributed tracing (OpenTelemetry), use exemplars to link high-latency metric data points to specific trace IDs, analyze histograms not averages, correlate with GC/CPU steal/IO wait",
+        "Enable verbose logging on all services until the pattern appears",
+        "Set up synthetic monitoring to reproduce the spike on demand"
+      ],
+      "answer": 1,
+      "explanation": "Averages hide tail latency. Histograms expose the p99 shape. Exemplars attach trace IDs to specific metric scrapes — jump from 'spike at 14:32' directly to the offending trace. Correlate with: JVM GC pauses, CPU steal in VMs, kernel scheduling latency, or external dependency timeouts."
+    },
+    {
+      "id": 5,
+      "category": "Security",
+      "difficulty": "hard",
+      "question": "How do you implement zero-trust networking inside a Kubernetes cluster?",
+      "options": [
+        "Use namespaces to isolate services — Kubernetes RBAC handles everything",
+        "Deploy a service mesh (Istio/Linkerd) for mTLS on all east-west traffic, enforce NetworkPolicies, use OPA/Gatekeeper for admission control, bind workloads to IRSA/Workload Identity",
+        "Add a WAF in front of the ingress controller",
+        "Use Pod Security Policies to restrict container privileges"
+      ],
+      "answer": 1,
+      "explanation": "Zero trust = verify at every hop. mTLS (service mesh) encrypts and authenticates all service-to-service comms. NetworkPolicies enforce default-deny with explicit allow rules. OPA validates admission (no latest tags, no privileged containers). Workload Identity gives pods scoped cloud credentials — not the overpowered node IAM role."
+    },
+    {
+      "id": 6,
+      "category": "Cloud Architecture",
+      "difficulty": "hard",
+      "question": "Design a multi-region active-active system with RPO=0 and RTO < 30 seconds.",
+      "options": [
+        "Use a single primary region with cross-region read replicas and promote on failure",
+        "Synchronous multi-region replication (CockroachDB/Spanner/DynamoDB Global Tables), stateless app tier, anycast global load balancing, conflict resolution strategy, chaos-engineered failover drills",
+        "Schedule hourly backups to a secondary region with automated restore scripts",
+        "Use Route53 latency routing with health checks and a 60s TTL"
+      ],
+      "answer": 1,
+      "explanation": "RPO=0 mandates synchronous replication — async always risks data loss. Active-active requires: globally distributed ACID database, stateless application layer (sessions in Redis Global or JWTs), Global Accelerator or Anycast for <1s traffic rerouting, conflict resolution (LWW, CRDT), and regular GameDays to validate RTO."
+    },
+    {
+      "id": 7,
+      "category": "GitOps",
+      "difficulty": "hard",
+      "question": "Why does GitOps prefer pull-based over push-based deployments? What problems does it solve?",
+      "options": [
+        "Pull-based is simply faster because the agent polls on its own schedule",
+        "Pull model: agent inside the cluster watches Git and self-reconciles — cluster credentials never leave the cluster, drift is detected and corrected automatically, Git is the audit log, free multi-cluster fan-out",
+        "Push-based is more secure because the CI system controls exactly when changes deploy",
+        "They're equivalent; the choice depends only on team preference"
+      ],
+      "answer": 1,
+      "explanation": "Push requires cluster credentials in CI — a significant attack surface. Pull (Argo CD, Flux) inverts this: the agent reconciles continuously. Benefits: no external cluster access, automatic drift correction, full audit trail via Git commits, declarative rollbacks (git revert), and a single operator manages N clusters via different repo paths."
+    },
+    {
+      "id": 8,
+      "category": "Linux",
+      "difficulty": "medium",
+      "question": "A server shows load average of 40 but only 8% CPU utilization. What's happening and how do you diagnose it?",
+      "options": [
+        "The server is overloaded — add more CPU cores",
+        "High I/O wait: processes are blocked on disk or network, inflating load average without consuming CPU. Diagnose with iostat -x, iotop, vmstat (wa%), check for NFS stalls or database lock contention",
+        "Memory exhaustion is causing swap thrashing",
+        "A runaway process is consuming CPU in kernel space, hidden from user-space metrics"
+      ],
+      "answer": 1,
+      "explanation": "Load average counts running + uninterruptible-sleep (D-state) processes. D-state = blocked on I/O. High load + low CPU = I/O bottleneck. Tools: iostat -x (util%, await ms), iotop (per-process I/O), vmstat 1 (wa column), ps axo stat,pid,comm | grep D. Common culprits: spinning disks, NFS timeout, database lock wait, broken RAID."
+    },
+    {
+      "id": 9,
+      "category": "Networking",
+      "difficulty": "hard",
+      "question": "When would you use a Service Mesh vs an API Gateway, and can they coexist?",
+      "options": [
+        "They're the same thing with different branding — pick one",
+        "API Gateway = North-South (ingress): auth, rate limiting, SSL termination for external consumers. Service Mesh = East-West (internal): mTLS, circuit breaking, retries, canary routing, tracing between microservices. They're complementary.",
+        "Use API Gateway for REST, Service Mesh for gRPC only",
+        "Service Mesh replaces the API Gateway in cloud-native architectures"
+      ],
+      "answer": 1,
+      "explanation": "Orthogonal concerns, not competing. API Gateway (Kong, AWS APIGW) manages external-facing concerns: consumer auth, rate limiting, API versioning. Service Mesh (Istio, Linkerd) manages internal service communication: mutual TLS, observability without code changes, traffic shaping, fault injection. Production architectures often run both."
+    },
+    {
+      "id": 10,
+      "category": "Databases",
+      "difficulty": "hard",
+      "question": "When would you accept eventual consistency, and when is strong consistency non-negotiable?",
+      "options": [
+        "Always use strong consistency — eventual consistency introduces too many bugs",
+        "Eventual consistency (AP): shopping carts, social feeds, DNS, view counts — availability matters more than accuracy. Strong consistency (CP): financial ledgers, inventory counts, seat reservations — correctness is non-negotiable.",
+        "Eventual consistency only applies to NoSQL databases",
+        "Use eventual consistency in dev, strong consistency in production"
+      ],
+      "answer": 1,
+      "explanation": "CAP theorem: partition tolerance is a given, so you choose between Availability and Consistency. Real-world nuance: DynamoDB offers tunable consistency per read, Cassandra uses quorum levels (ONE/QUORUM/ALL), CockroachDB offers serializable isolation. Domain matters: losing 1 in 1000 cart updates is tolerable; an overdraft check is not."
+    },
+    {
+      "id": 11,
+      "category": "Docker",
+      "difficulty": "medium",
+      "question": "What's the difference between COPY and ADD in a Dockerfile, and what's best practice?",
+      "options": [
+        "They're identical — Docker deprecated one of them",
+        "ADD can fetch remote URLs and auto-extract tar/gzip archives (implicit magic). COPY does one thing: copy local files. Use COPY by default — predictability beats convenience.",
+        "COPY is faster, ADD creates smaller image layers",
+        "ADD should always be used because it supports more file types"
+      ],
+      "answer": 1,
+      "explanation": "ADD's 'implicit magic' (URL fetching + auto-extraction) violates least surprise. A .tar.gz added with ADD silently becomes an extracted directory. Best practice: use COPY for predictability; for downloads, use RUN curl | tar xz; for extraction, consider multi-stage builds."
+    },
+    {
+      "id": 12,
+      "category": "CI/CD",
+      "difficulty": "medium",
+      "question": "What is a canary deployment, and what signals do you use to automate promotion or rollback?",
+      "options": [
+        "A canary deploys to 100% of users but only during off-peak hours",
+        "Progressive traffic shift (1%→10%→25%→100%) to the new version. Automate using error rate delta, p99 latency vs baseline, and business KPIs. Tools: Argo Rollouts + Prometheus analysis templates, Flagger.",
+        "A blue-green deployment that uses a different naming convention",
+        "Canary releases always require manual approval at each traffic step"
+      ],
+      "answer": 1,
+      "explanation": "Statistical significance matters — don't compare canary vs baseline with too few samples. Argo Rollouts AnalysisTemplate: define max error rate 1%, max p99 200ms, custom Prometheus queries for business metrics. If any metric breaches threshold during the window, automatic rollback triggers."
+    },
+    {
+      "id": 13,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "question": "How does Kubernetes scheduling work, and what mechanisms control pod placement?",
+      "options": [
+        "Kubernetes schedules randomly across nodes with available capacity",
+        "Scheduler scores nodes via predicates (filter: taints, affinity, resources) then priorities (score: spread, resource fit). Control via: nodeSelector, nodeAffinity, podAffinity/antiAffinity, taints+tolerations, topology spread constraints.",
+        "You must manually assign pods to nodes using nodeName",
+        "Pod placement is handled entirely by the CNI plugin"
+      ],
+      "answer": 1,
+      "explanation": "Two-phase: Filter (eliminate nodes that can't run the pod: taints without tolerations, insufficient resources, missing labels) then Score (rank remaining: least-requested, inter-pod affinity weight, topology spread). TopologySpreadConstraints is the modern way to spread pods across zones/nodes with fine-grained skew control."
+    },
+    {
+      "id": 14,
+      "category": "Security",
+      "difficulty": "hard",
+      "question": "A developer accidentally commits an AWS secret key to a public GitHub repo. What's your incident response?",
+      "options": [
+        "Delete the commit from Git history — GitHub will remove it within hours",
+        "Immediately revoke/rotate the credential (assume compromised), audit CloudTrail for usage in last 24h, assess blast radius, check for new IAM entities created, then implement prevention: git-secrets hooks, GitHub secret scanning, Vault or AWS Secrets Manager",
+        "Make the repo private to prevent further exposure",
+        "Change the secret key and push a new commit to overwrite the history"
+      ],
+      "answer": 1,
+      "explanation": "Assume the credential was scraped within seconds — bots monitor GitHub in real-time. The 3 Rs: Revoke (disable key immediately), Review (CloudTrail: ListBuckets, AssumeRole, CreateUser in blast window — check for lateral movement), Remediate (rotate related secrets, add detective controls). Git history rewrites don't help — the secret is already in scanner databases."
+    },
+    {
+      "id": 15,
+      "category": "Cloud Architecture",
+      "difficulty": "hard",
+      "question": "You need to migrate a stateful legacy monolith to Kubernetes with zero downtime. What's your strategy?",
+      "options": [
+        "Containerize the entire monolith and deploy to K8s in one maintenance window",
+        "Strangler Fig pattern: route traffic via API gateway, incrementally extract services behind feature flags, StatefulSets with PVCs for stateful components, shadow traffic on new services before cutover, expand-contract DB migrations",
+        "Lift-and-shift the VM to a container — it's the same thing with a different runtime",
+        "Rewrite everything as microservices first, then migrate"
+      ],
+      "answer": 1,
+      "explanation": "Strangler Fig lets you migrate incrementally with no big-bang risk. Key tactics: (1) reverse proxy routes specific paths to new services while legacy handles the rest, (2) expand-contract DB migrations, (3) StatefulSets + PVCs for stateful workloads, (4) shadow/dark traffic tests new service before live cutover, (5) feature flags enable instant rollback without redeployment."
+    }
+  ]
+}
