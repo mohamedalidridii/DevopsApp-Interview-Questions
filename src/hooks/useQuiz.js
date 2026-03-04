@@ -62,6 +62,12 @@ export function useQuiz() {
     else setWrong((w) => w + 1)
   }, [revealed, currentQ])
 
+  // For yaml-type cards that manage their own reveal state
+  const registerAnswer = useCallback((isCorrect) => {
+    if (isCorrect) setScore((s) => s + 1)
+    else setWrong((w) => w + 1)
+  }, [])
+
   const advance = useCallback(() => {
     if (isLast) { setScreen('result'); return }
     setIdx((i) => i + 1)
@@ -95,6 +101,7 @@ export function useQuiz() {
     goToHome,
     start,
     pick,
+    registerAnswer,
     advance,
     skip,
     backToCategories,

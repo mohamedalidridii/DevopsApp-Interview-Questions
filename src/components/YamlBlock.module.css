@@ -1,0 +1,121 @@
+.block {
+  background: #070d14;
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Choice mode hover/state ── */
+.choiceBlock {
+  cursor: pointer;
+}
+.choiceBlock:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.1);
+}
+.chosenBlock {
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12) !important;
+}
+.correctBlock {
+  border-color: var(--gr) !important;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.1) !important;
+}
+.wrongBlock {
+  border-color: var(--re) !important;
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.1) !important;
+}
+
+/* ── Label row ── */
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--bd);
+  background: rgba(255,255,255,0.02);
+}
+.label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--mu);
+}
+.correctBadge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gr);
+}
+.wrongBadge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--re);
+}
+
+/* ── Pre / code ── */
+.pre {
+  margin: 0;
+  padding: 12px 0 12px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ── Lines ── */
+.line {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 1px 14px;
+  transition: background 0.1s;
+}
+
+.lineClickable {
+  cursor: pointer;
+}
+.lineClickable:hover {
+  background: rgba(56, 189, 248, 0.06);
+}
+
+.lineSelected {
+  background: rgba(56, 189, 248, 0.1);
+  cursor: pointer;
+}
+
+.lineCorrect {
+  background: rgba(248, 113, 113, 0.12) !important;
+}
+.lineCorrect .lineNum { color: var(--re) !important; }
+
+.lineWrong {
+  background: rgba(248, 113, 113, 0.12) !important;
+}
+
+.lineNum {
+  flex-shrink: 0;
+  width: 22px;
+  text-align: right;
+  font-size: 10px;
+  color: #2d3f55;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.lineContent {
+  white-space: pre;
+  flex: 1;
+}
+
+.lineMarker {
+  font-size: 10px;
+  color: var(--re);
+  margin-left: 12px;
+  opacity: 0.8;
+  white-space: nowrap;
+}

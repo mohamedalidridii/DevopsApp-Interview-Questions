@@ -209,6 +209,103 @@
       ],
       "answer": 1,
       "explanation": "Strangler Fig lets you migrate incrementally with no big-bang risk. Key tactics: (1) reverse proxy routes specific paths to new services while legacy handles the rest, (2) expand-contract DB migrations, (3) StatefulSets + PVCs for stateful workloads, (4) shadow/dark traffic tests new service before live cutover, (5) feature flags enable instant rollback without redeployment."
+    },
+    {
+      "id": 16,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "yaml-choice",
+      "question": "Which Pod spec correctly configures a liveness probe with an initial delay and defines resource limits?",
+      "explanation": "Option B is correct. It sets initialDelaySeconds (gives the app time to start), periodSeconds, and defines both requests and limits for cpu and memory under resources. Option A is missing initialDelaySeconds and has limits nested under requests instead of as a sibling key.",
+      "answer": 1,
+      "yamls": [
+        {
+          "label": "Option A",
+          "code": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: my-app\nspec:\n  containers:\n  - name: app\n    image: my-app:1.0\n    livenessProbe:\n      httpGet:\n        path: /healthz\n        port: 8080\n      periodSeconds: 10\n    resources:\n      requests:\n        memory: \"64Mi\"\n        cpu: \"250m\"\n        limits:\n          memory: \"128Mi\"\n          cpu: \"500m\""
+        },
+        {
+          "label": "Option B",
+          "code": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: my-app\nspec:\n  containers:\n  - name: app\n    image: my-app:1.0\n    livenessProbe:\n      httpGet:\n        path: /healthz\n        port: 8080\n      initialDelaySeconds: 15\n      periodSeconds: 10\n    resources:\n      requests:\n        memory: \"64Mi\"\n        cpu: \"250m\"\n      limits:\n        memory: \"128Mi\"\n        cpu: \"500m\""
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "yaml-choice",
+      "question": "Which Deployment manifest correctly configures a RollingUpdate strategy that ensures at least 2 pods are always available during a rollout?",
+      "explanation": "Option A is correct. maxUnavailable: 0 ensures no pods go down before new ones are ready, and maxSurge: 1 allows one extra pod during the update. Option B sets maxUnavailable: 3 which would take down 3 pods at once on a 3-replica deployment — zero availability guaranteed.",
+      "answer": 0,
+      "yamls": [
+        {
+          "label": "Option A",
+          "code": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: api-server\nspec:\n  replicas: 3\n  strategy:\n    type: RollingUpdate\n    rollingUpdate:\n      maxUnavailable: 0\n      maxSurge: 1\n  selector:\n    matchLabels:\n      app: api-server\n  template:\n    metadata:\n      labels:\n        app: api-server\n    spec:\n      containers:\n      - name: api\n        image: api-server:2.1"
+        },
+        {
+          "label": "Option B",
+          "code": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: api-server\nspec:\n  replicas: 3\n  strategy:\n    type: RollingUpdate\n    rollingUpdate:\n      maxUnavailable: 3\n      maxSurge: 0\n  selector:\n    matchLabels:\n      app: api-server\n  template:\n    metadata:\n      labels:\n        app: api-server\n    spec:\n      containers:\n      - name: api\n        image: api-server:2.1"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "yaml-choice",
+      "question": "Which Service manifest correctly exposes a Deployment internally within the cluster on port 80, forwarding to container port 8080?",
+      "explanation": "Option B is correct. The selector matches the pod label app: web-app, port: 80 is the service port, and targetPort: 8080 maps to the container. Option A uses port: 8080 as the service port (clients would need to call :8080) and is missing the targetPort — so Kubernetes defaults targetPort to 8080 which matches by accident, but the service port is wrong for an internal HTTP service.",
+      "answer": 1,
+      "yamls": [
+        {
+          "label": "Option A",
+          "code": "apiVersion: v1\nkind: Service\nmetadata:\n  name: web-service\nspec:\n  selector:\n    app: web-app\n  ports:\n  - protocol: TCP\n    port: 8080\n  type: ClusterIP"
+        },
+        {
+          "label": "Option B",
+          "code": "apiVersion: v1\nkind: Service\nmetadata:\n  name: web-service\nspec:\n  selector:\n    app: web-app\n  ports:\n  - protocol: TCP\n    port: 80\n    targetPort: 8080\n  type: ClusterIP"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "yaml-spot",
+      "question": "This Pod spec has one misconfigured line that will prevent it from being scheduled. Click the wrong line.",
+      "explanation": "Line with 'cpu: 500m' under limits is fine — the bug is the indentation: 'limits' is nested under 'requests' instead of being a sibling. The correct structure has requests and limits as sibling keys under resources.",
+      "wrongLine": 17,
+      "yaml": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: backend\n  namespace: production\nspec:\n  containers:\n  - name: backend\n    image: backend:3.2.1\n    ports:\n    - containerPort: 3000\n    resources:\n      requests:\n        memory: \"128Mi\"\n        cpu: \"250m\"\n        limits:\n          memory: \"256Mi\"\n          cpu: \"500m\""
+    },
+    {
+      "id": 20,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "yaml-spot",
+      "question": "This Deployment has a label mismatch that will cause the Deployment controller to fail. Click the wrong line.",
+      "explanation": "The selector matchLabels uses 'app: my-api' but the pod template labels set 'app: my-app'. The selector must exactly match the template labels — this mismatch causes the Deployment to fail with a validation error.",
+      "wrongLine": 9,
+      "yaml": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: my-api\nspec:\n  replicas: 2\n  selector:\n    matchLabels:\n      app: my-api\n  template:\n    metadata:\n      labels:\n        app: my-app\n    spec:\n      containers:\n      - name: api\n        image: my-api:latest\n        ports:\n        - containerPort: 8080"
+    },
+    {
+      "id": 21,
+      "category": "Kubernetes",
+      "difficulty": "medium",
+      "type": "yaml-spot",
+      "question": "This ConfigMap-based environment variable injection has a bug. Click the wrong line.",
+      "explanation": "The key 'configMapRef' should be 'configMapKeyRef' when referencing a specific key from a ConfigMap in an env var. Using 'configMapRef' is for envFrom (loading all keys), not for individual env vars with a specific key.",
+      "wrongLine": 11,
+      "yaml": "apiVersion: v1\nkind: Pod\nmetadata:\n  name: app-pod\nspec:\n  containers:\n  - name: app\n    image: app:1.0\n    env:\n    - name: DB_HOST\n      valueFrom:\n        configMapRef:\n          name: app-config\n          key: database_host"
+    },
+    {
+      "id": 22,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "yaml-spot",
+      "question": "This NetworkPolicy intends to allow ingress only from pods with label 'role: frontend' but has a mistake. Click the wrong line.",
+      "explanation": "'podSelector' under ingress from should be inside a list item (starting with '-'). Without the dash, it is not a valid list entry, meaning the policy has no valid ingress rules and will block all traffic — the opposite of the intent.",
+      "wrongLine": 13,
+      "yaml": "apiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-frontend\n  namespace: backend\nspec:\n  podSelector:\n    matchLabels:\n      role: backend\n  policyTypes:\n  - Ingress\n  ingress:\n  - from:\n    podSelector:\n      matchLabels:\n        role: frontend"
     }
   ]
 }

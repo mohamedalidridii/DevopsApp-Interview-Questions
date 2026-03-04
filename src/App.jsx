@@ -67,6 +67,7 @@ export default function App() {
           wrong={quiz.wrong}
           skipped={quiz.skipped}
           onPick={quiz.pick}
+          onAnswer={quiz.registerAnswer}
           onAdvance={quiz.advance}
           onSkip={quiz.skip}
         />
