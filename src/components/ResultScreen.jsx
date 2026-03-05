@@ -10,9 +10,8 @@ function getGrade(pct) {
 
 export default function ResultScreen({
   score, wrong, skipped, total,
-  category,   // null = "All"
-  onRestart,  // retry same category
-  onChangeCategory,
+  category, bestStreak,
+  onRestart, onChangeCategory,
 }) {
   const pct   = Math.round((score / total) * 100)
   const grade = getGrade(pct)
@@ -24,6 +23,11 @@ export default function ResultScreen({
         <div className={styles.catPill}>
           {category ? `// ${category}` : '// All Categories'}
         </div>
+        {bestStreak >= 3 && (
+          <div className={styles.streakPill}>
+            🔥 Best streak: {bestStreak}
+          </div>
+        )}
       </div>
 
       <div className={styles.grade}>{grade.title}</div>

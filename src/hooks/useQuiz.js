@@ -17,28 +17,26 @@ export const ALL_CATEGORIES = (() => {
 })()
 
 export function useQuiz() {
-  // screens: 'home' | 'categories' | 'quiz' | 'result'
-  const [screen, setScreen]         = useState('home')
-  const [activeCategory, setActiveCategory] = useState(null) // null = All
-  const [questions, setQuestions]   = useState([])
-  const [idx, setIdx]               = useState(0)
-  const [revealed, setRevealed]     = useState(false)
-  const [chosen, setChosen]         = useState(null)
-  const [score, setScore]           = useState(0)
-  const [wrong, setWrong]           = useState(0)
-  const [skipped, setSkipped]       = useState(0)
+  const [screen, setScreen]               = useState('home')
+  const [activeCategory, setActiveCategory] = useState(null)
+  const [questions, setQuestions]         = useState([])
+  const [idx, setIdx]                     = useState(0)
+  const [revealed, setRevealed]           = useState(false)
+  const [chosen, setChosen]               = useState(null)
+  const [score, setScore]                 = useState(0)
+  const [wrong, setWrong]                 = useState(0)
+  const [skipped, setSkipped]             = useState(0)
+  const [streak, setStreak]               = useState(0)
+  const [bestStreak, setBestStreak]       = useState(0)
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null) // true|false|null
 
   const currentQ  = questions[idx] ?? null
   const isLast    = idx + 1 >= questions.length
   const isCorrect = revealed && chosen === currentQ?.answer
 
-  // Go to category picker
   const goToCategories = useCallback(() => setScreen('categories'), [])
+  const goToHome       = useCallback(() => setScreen('home'), [])
 
-  // Go back to home
-  const goToHome = useCallback(() => setScreen('home'), [])
-
-  // Start quiz — category=null means "All"
   const start = useCallback((category = null) => {
     const pool = category
       ? db.questions.filter((q) => q.category === category)
@@ -49,38 +47,57 @@ export function useQuiz() {
     setScore(0)
     setWrong(0)
     setSkipped(0)
+    setStreak(0)
+    setBestStreak(0)
+    setLastAnswerCorrect(null)
     setRevealed(false)
     setChosen(null)
     setScreen('quiz')
+  }, [])
+
+  // Shared streak logic
+  const _applyAnswer = useCallback((correct) => {
+    if (correct) {
+      setScore((s) => s + 1)
+      setStreak((s) => {
+        const next = s + 1
+        setBestStreak((b) => Math.max(b, next))
+        return next
+      })
+      setLastAnswerCorrect(true)
+    } else {
+      setWrong((w) => w + 1)
+      setStreak(0)
+      setLastAnswerCorrect(false)
+    }
   }, [])
 
   const pick = useCallback((i) => {
     if (revealed) return
     setChosen(i)
     setRevealed(true)
-    if (i === currentQ.answer) setScore((s) => s + 1)
-    else setWrong((w) => w + 1)
-  }, [revealed, currentQ])
+    _applyAnswer(i === currentQ.answer)
+  }, [revealed, currentQ, _applyAnswer])
 
-  // For yaml-type cards that manage their own reveal state
-  const registerAnswer = useCallback((isCorrect) => {
-    if (isCorrect) setScore((s) => s + 1)
-    else setWrong((w) => w + 1)
-  }, [])
+  const registerAnswer = useCallback((correct) => {
+    _applyAnswer(correct)
+  }, [_applyAnswer])
 
   const advance = useCallback(() => {
     if (isLast) { setScreen('result'); return }
     setIdx((i) => i + 1)
     setRevealed(false)
     setChosen(null)
+    setLastAnswerCorrect(null)
   }, [isLast])
 
   const skip = useCallback(() => {
     setSkipped((s) => s + 1)
+    setStreak(0)
+    setLastAnswerCorrect(null)
     advance()
   }, [advance])
 
-  // From result: go back to category picker (not home)
   const backToCategories = useCallback(() => setScreen('categories'), [])
 
   return {
@@ -96,6 +113,9 @@ export function useQuiz() {
     score,
     wrong,
     skipped,
+    streak,
+    bestStreak,
+    lastAnswerCorrect,
     allQuestions: db.questions,
     goToCategories,
     goToHome,

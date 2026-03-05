@@ -4,6 +4,7 @@ import CategoryScreen from './components/CategoryScreen'
 import QuestionCard   from './components/QuestionCard'
 import ResultScreen   from './components/ResultScreen'
 import ProgressBar    from './components/ProgressBar'
+import StreakBadge    from './components/StreakBadge'
 import styles from './App.module.css'
 
 export default function App() {
@@ -11,7 +12,6 @@ export default function App() {
 
   return (
     <div className={styles.app}>
-      {/* ── Scanline overlay ── */}
       <div className={styles.scanlines} aria-hidden="true" />
 
       {/* ── Topbar ── */}
@@ -21,35 +21,39 @@ export default function App() {
           onClick={() => quiz.screen !== 'home' && quiz.goToHome()}
           style={{ cursor: quiz.screen !== 'home' ? 'pointer' : 'default', background: 'none', border: 'none' }}
         >
-          Dev<em>Ops</em>.medaly
+          Dev<em>Ops</em>.Quiz
         </button>
 
         {quiz.screen === 'quiz' && (
-          <div className={styles.liveScore}>
-            <strong>{quiz.activeCategory ?? 'ALL'}</strong>
-            &nbsp;·&nbsp;{quiz.idx + 1}/{quiz.total}
+          <div className={styles.topbarRight}>
+            <StreakBadge
+              streak={quiz.streak}
+              bestStreak={quiz.bestStreak}
+              lastAnswerCorrect={quiz.lastAnswerCorrect}
+            />
+            <div className={styles.liveScore}>
+              <strong>{quiz.activeCategory ?? 'ALL'}</strong>
+              &nbsp;·&nbsp;{quiz.idx + 1}/{quiz.total}
+            </div>
           </div>
         )}
       </header>
 
-      {/* ── Progress (quiz only) ── */}
+      {/* ── Progress ── */}
       {quiz.screen === 'quiz' && (
         <ProgressBar current={quiz.idx + 1} total={quiz.total} />
       )}
 
       {/* ── Screens ── */}
       {quiz.screen === 'home' && (
-        <HomeScreen
-          questions={quiz.allQuestions}
-          onEnter={quiz.goToCategories}
-        />
+        <HomeScreen questions={quiz.allQuestions} onEnter={quiz.goToCategories} />
       )}
 
       {quiz.screen === 'categories' && (
         <CategoryScreen
           allQuestions={quiz.allQuestions}
           onStart={quiz.start}
-              onBack={quiz.goToHome}
+          onBack={quiz.goToHome}
         />
       )}
 
@@ -80,6 +84,7 @@ export default function App() {
           skipped={quiz.skipped}
           total={quiz.total}
           category={quiz.activeCategory}
+          bestStreak={quiz.bestStreak}
           onRestart={() => quiz.start(quiz.activeCategory)}
           onChangeCategory={quiz.backToCategories}
         />

@@ -12,7 +12,10 @@
 .topRow {
   display: flex;
   justify-content: center;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .catPill {
@@ -22,6 +25,17 @@
   color: var(--ac);
   background: rgba(56, 189, 248, 0.08);
   border: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+
+.streakPill {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #fb923c;
+  background: rgba(251, 146, 60, 0.08);
+  border: 1px solid rgba(251, 146, 60, 0.25);
   padding: 5px 12px;
   border-radius: 999px;
 }

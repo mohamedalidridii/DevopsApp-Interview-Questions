@@ -67,3 +67,10 @@
 .liveScore strong {
   color: var(--gr);
 }
+
+.topbarRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
