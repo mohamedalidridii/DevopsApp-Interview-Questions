@@ -21,7 +21,7 @@ export default function App() {
           onClick={() => quiz.screen !== 'home' && quiz.goToHome()}
           style={{ cursor: quiz.screen !== 'home' ? 'pointer' : 'default', background: 'none', border: 'none' }}
         >
-          Dev<em>Ops</em>.Quiz
+          Dev<em>Ops</em>.Medaly
         </button>
 
         {quiz.screen === 'quiz' && (
