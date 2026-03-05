@@ -1,6 +1,7 @@
 import Badge from './Badge'
 import YamlChoiceCard from './YamlChoiceCard'
-import YamlSpotCard   from './YamlSpotCard'
+import YamlSpotCard     from './YamlSpotCard'
+import CommandOrderCard from './CommandOrderCard'
 import { CAT_COLORS, DEFAULT_CAT, DIFFICULTY, LETTERS } from '../data/constants'
 import styles from './QuestionCard.module.css'
 
@@ -93,6 +94,23 @@ export default function QuestionCard(props) {
   if (question.type === 'yaml-spot') {
     return (
       <YamlSpotCard
+        question={question}
+        idx={props.idx}
+        total={props.total}
+        isLast={props.isLast}
+        score={props.score}
+        wrong={props.wrong}
+        skipped={props.skipped}
+        onAnswer={props.onAnswer}
+        onAdvance={props.onAdvance}
+        onSkip={props.onSkip}
+      />
+    )
+  }
+
+  if (question.type === 'cmd-order') {
+    return (
+      <CommandOrderCard
         question={question}
         idx={props.idx}
         total={props.total}

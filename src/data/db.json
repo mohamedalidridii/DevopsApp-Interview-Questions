@@ -307,5 +307,86 @@
       "wrongLine": 13,
       "yaml": "apiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-frontend\n  namespace: backend\nspec:\n  podSelector:\n    matchLabels:\n      role: backend\n  policyTypes:\n  - Ingress\n  ingress:\n  - from:\n    podSelector:\n      matchLabels:\n        role: frontend"
     }
+    ,
+    {
+      "id": 23,
+      "category": "Kubernetes",
+      "difficulty": "medium",
+      "type": "cmd-order",
+      "question": "Order these steps to correctly debug a pod stuck in CrashLoopBackOff from start to resolution.",
+      "explanation": "Start with describe to see events and probe failures, then logs --previous to read the last crash output, then exec in if the container is running to poke around, identify the fix (bad env var, missing secret, wrong port), apply the fix and verify the pod reaches Running state.",
+      "commands": [
+        "kubectl describe pod <pod-name> -n <namespace>",
+        "kubectl logs <pod-name> --previous -n <namespace>",
+        "kubectl exec -it <pod-name> -- /bin/sh",
+        "kubectl set env deployment/<name> KEY=correct-value",
+        "kubectl get pods -w -n <namespace>"
+      ],
+      "order": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": 24,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "cmd-order",
+      "question": "You need to perform a zero-downtime rolling update and then verify it. Put these commands in the correct order.",
+      "explanation": "First check the current state of the deployment, then set the new image to trigger the rollout, watch the rollout progress in real-time, verify the rollout completed successfully, and finally confirm all pods are running the new image.",
+      "commands": [
+        "kubectl get deployment my-app -o wide",
+        "kubectl set image deployment/my-app app=my-app:v2.0",
+        "kubectl rollout status deployment/my-app",
+        "kubectl rollout history deployment/my-app",
+        "kubectl get pods -l app=my-app -o jsonpath='{.items[*].spec.containers[*].image}'"
+      ],
+      "order": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": 25,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "cmd-order",
+      "question": "Order the steps to safely drain a node for maintenance and then return it to service.",
+      "explanation": "First cordon the node to prevent new pods from scheduling, then drain it to evict all existing pods gracefully (respecting PodDisruptionBudgets), perform maintenance, then uncordon to allow scheduling again, and finally verify pods are being scheduled on it.",
+      "commands": [
+        "kubectl cordon <node-name>",
+        "kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data",
+        "# perform node maintenance (OS patch, hardware swap, etc.)",
+        "kubectl uncordon <node-name>",
+        "kubectl get pods -o wide --field-selector spec.nodeName=<node-name>"
+      ],
+      "order": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": 26,
+      "category": "Kubernetes",
+      "difficulty": "hard",
+      "type": "cmd-order",
+      "question": "A deployment rollout caused errors in production. Order these commands to roll back and confirm recovery.",
+      "explanation": "First check the rollout history to identify the bad revision, immediately undo the rollout to the previous working version, watch the rollback complete in real-time, verify the deployment is now stable, and then check the history again to confirm the revision was recorded.",
+      "commands": [
+        "kubectl rollout history deployment/my-app",
+        "kubectl rollout undo deployment/my-app",
+        "kubectl rollout status deployment/my-app",
+        "kubectl get pods -l app=my-app",
+        "kubectl describe deployment my-app | grep Image"
+      ],
+      "order": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": 27,
+      "category": "Kubernetes",
+      "difficulty": "medium",
+      "type": "cmd-order",
+      "question": "Order the steps to create a TLS secret and use it in an Ingress resource.",
+      "explanation": "First generate the TLS certificate and key with openssl, create the Kubernetes secret from those files, apply the Ingress manifest that references the secret, verify the secret was created correctly, then confirm the Ingress has picked up the TLS configuration.",
+      "commands": [
+        "openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj '/CN=myapp.example.com'",
+        "kubectl create secret tls myapp-tls --cert=tls.crt --key=tls.key -n production",
+        "kubectl apply -f ingress-tls.yaml",
+        "kubectl get secret myapp-tls -n production -o yaml",
+        "kubectl describe ingress myapp-ingress -n production"
+      ],
+      "order": [0, 1, 2, 3, 4]
+    }
   ]
 }
